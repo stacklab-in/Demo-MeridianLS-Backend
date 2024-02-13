@@ -40,6 +40,10 @@ const update = async (req, res) => {
 
 const getShipment = async (req, res) => {
     try {
+
+        if (!req.body.trackingNumber) {
+            return res.status(400).json({ error: 'Tracking Number is required' });
+        }
         const shipment = await ShipmentTracking.findOne({ isDeleted: false, trackingNo: req.body.trackingNumber });
         return res.status(200).json({ msg: 'Shipment fetched successfully!.', data: shipment });
     } catch (error) {

@@ -57,7 +57,7 @@ const getShipment = async (req, res) => {
         const shipment = await ShipmentTracking.findOne({ isDeleted: false, trackingNo: req.body.trackingNumber });
 
         if (!shipment) {
-            return res.status(404).json({ error: 'Shipment not found' });
+            return res.status(200).json({ msg: 'Shipment not found', data: {} });
         }
 
         let modifiedShipment = { ...shipment.toObject() }; // Clone the shipment object to avoid mutation

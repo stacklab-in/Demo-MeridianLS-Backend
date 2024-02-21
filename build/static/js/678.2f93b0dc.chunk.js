@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunk_tracking_software=self.webpackChunk_tracking_software||[]).push([[678],{19678:function(a,e,t){t.r(e);var r=t(7464);e.default=r.g}}]);
+//# sourceMappingURL=678.2f93b0dc.chunk.js.map

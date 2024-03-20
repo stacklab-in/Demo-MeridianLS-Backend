@@ -1,5 +1,13 @@
 const { auditLogger, serverLogger } = require("../utils/loggerWinston");
 const ShipmentTracking = require("../models/ShipmentTracking");
+const Jobcard = require("../models/Jobcard");
+const sendEmail = require("../utils/mailConfig");
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { month: 'long', day: 'numeric', year: 'numeric' };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+}
 
 const list = async (req, res) => {
     try {
@@ -22,9 +30,29 @@ const update = async (req, res) => {
             return res.status(404).json({ error: 'shipment not found' });
         };
 
+        const jobcard = await Jobcard.findOne({ trackingNumber: shipment.trackingNo, isDeleted: false }).populate('leadId');
+
+        if (!jobcard) {
+            return res.status(404).json({ error: 'Jobcard not found!' });
+        };
+
+        const orderDetails = {
+            orderNumber: jobcard.number,
+            recipientName: jobcard.leadId.name,
+            trackingNumber: jobcard.trackingNumber,
+            carrierName: jobcard.carrierFlight,
+            estimatedDeliveryDate: jobcard.deliveryDate ? formatDate(jobcard.deliveryDate) : 'N/A',
+            trackingLink: "http://meridianls.co.in/tracking.html",
+            shipmentStatus: updatedData.value,
+            recipientEmail: jobcard.quotation.clientEmail
+        };
+        //  Send Mail Message
+        const emailResponse = sendEmail(orderDetails);
+
+
         if (shipment.statuses[shipment.statuses.length - 1].value === updatedData.value) {
             return res.status(400).json({ error: 'Shipment already in this status!' });
-        }
+        };
 
         shipment.statuses.push(updatedData);
         await shipment.save();
@@ -40,45 +68,15 @@ const update = async (req, res) => {
 
 const getShipment = async (req, res) => {
     try {
-        if (!req.body.trackingNumber) {
-            return res.status(400).json({ error: 'Tracking Number is required' });
-        }
-        const statusValueMap = {
-            "Pre Shipment Doc": "PreShipmentDoc",
-            "Picked Up": "PickedUp",
-            "In Transit Origin": "InTransitOriginPort",
-            "Clearance at Origin Port": "ClearanceatOriginPort",
-            "In Transit Overseas": "InTransitOverseas",
-            "Clearance at Destination Port": "ClearanceatDestinationPort",
-            "In Transit Destination": "InTransitDestination",
-            "Delivered": "Delivered"
-        };
-
         const shipment = await ShipmentTracking.findOne({ isDeleted: false, trackingNo: req.body.trackingNumber });
-
-        if (!shipment) {
-            return res.status(200).json({ msg: 'Shipment not found', data: {} });
-        }
-
-        let modifiedShipment = { ...shipment.toObject() }; // Clone the shipment object to avoid mutation
-
-        if (modifiedShipment.statuses && modifiedShipment.statuses.length > 0) {
-            modifiedShipment.statuses = modifiedShipment.statuses.map((status, index) => {
-                const mappedValue = statusValueMap[status.value] || status.value; // Get the mapped value or original value if not found
-                console.log("🚀 ~ modifiedShipment.statuses=modifiedShipment.statuses.map ~ mappedValue:", mappedValue)
-                return { ...status, value: mappedValue, stageId: index }; // Adding stageId to each status object
-            })
-        }
-
-        console.log(modifiedShipment);
-        return res.status(200).json({ msg: 'Shipment fetched successfully!', data: modifiedShipment });
+        return res.status(200).json({ msg: 'Shipment fetched successfully!.', data: shipment });
     } catch (error) {
         console.log(error);
         serverLogger("error", { error: error.stack || error.toString() });
         return res.status(500).json({ error: 'Internal Server Error' });
     }
-};
 
+};
 
 module.exports = {
     update, list, getShipment

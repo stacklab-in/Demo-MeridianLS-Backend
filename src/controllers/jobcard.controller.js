@@ -3,7 +3,14 @@ const Jobcard = require("../models/Jobcard");
 const { auditLogger, serverLogger } = require("../utils/loggerWinston");
 const Lead = require("../models/Lead");
 const ShipmentTracking = require("../models/ShipmentTracking");
+const sendEmail = require("../utils/mailConfig");
+// const sendEmail = require("../utils/mailConfig");
 
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { month: 'long', day: 'numeric', year: 'numeric' };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+};
 
 const add = async (req, res) => {
     try {
@@ -18,6 +25,7 @@ const add = async (req, res) => {
         requestBody.trackingNumber = trackingNumber;
 
         const lead = await Lead.findOne({ _id: requestBody.leadId });
+        console.log("🚀 ~ add ~ lead:", lead)
 
         // Make Jobcard created true to lead
         lead.isJobcardCreated = true;
@@ -42,14 +50,29 @@ const add = async (req, res) => {
         };
 
         requestBody.shipmentId = shipmentTracking._id;
-        
+
         const newJobcard = await Jobcard.create(requestBody);
+        console.log("🚀 ~ add ~ requestBody:", requestBody)
 
         if (!newJobcard) {
             return res.status(400).json({ error: 'Error while creating Jobcard!..' })
         };
 
 
+        const orderDetails = {
+            orderNumber: newJobcard.number,
+            recipientName: lead.name,
+            trackingNumber: newJobcard.trackingNumber,
+            carrierName: newJobcard.carrierFlight,
+            estimatedDeliveryDate: newJobcard.deliveryDate ? formatDate(newJobcard.deliveryDate) : 'N/A',
+            trackingLink: "http://meridianls.co.in/tracking.html",
+            shipmentStatus: 'Pre Shipment Doc',
+            recipientEmail: newJobcard.quotation.clientEmail
+        };
+
+
+        //  Send Mail Message
+        const emailResponse = sendEmail(orderDetails);
 
         return res.status(201).json({
             msg: 'Jobcard created successfully!..',
@@ -87,7 +110,7 @@ const update = async (req, res) => {
 const list = async (req, res) => {
     try {
         const query = { isDeleted: false, userId: req.user._id };
-        const jobcards = await Jobcard.find(query).populate('leadId');
+        const jobcards = await Jobcard.find(query).populate('leadId shipmentId');
         return res.status(200).json({ msg: 'Jobcards fetched successfully!.', data: jobcards });
     } catch (error) {
         serverLogger("error", { error: error.stack || error.toString() });

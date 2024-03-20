@@ -51,7 +51,8 @@ const jobcardSchema = new mongoose.Schema({
     overseasAgent: overseasAgentSchema,
     transport: transportSchema,
     shipmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'ShipmentTracking', required: true },
-    isDeleted: { type: Boolean, default: false }
+    isDeleted: { type: Boolean, default: false },
+    terms: []
 }, { timestamps: true });
 
 const JobcardModel = mongoose.model('Jobcard', jobcardSchema);

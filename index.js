@@ -7,6 +7,7 @@ const roleRoutes = require('./src/routes/role.routes');
 const leadRoutes = require('./src/routes/lead.routes');
 const jobcardRoutes = require('./src/routes/jobcard.routes');
 const shipmentRoutes = require('./src/routes/shipment.routes');
+const termRoutes = require('./src/routes/term.routes');
 
 // Initialize the MongoDB connection via mongoose module
 require("./src/db/db");
@@ -26,6 +27,7 @@ app.use('/role', roleRoutes);
 app.use('/lead', leadRoutes);
 app.use('/jobcard', jobcardRoutes);
 app.use('/shipment', shipmentRoutes);
+app.use('/terms', termRoutes);
 
 // app.get("/endpoints", function (req, res) {
 //     const transformedArray = endpointsDescriptor

@@ -42,11 +42,11 @@ const inquirySchema = new Schema({
   },
   deliveryAddressCode: {
     type: Number,
-    required: true
+    // required: true
   },
   pickUpAddressCode: {
     type: Number,
-    required: true
+    // required: true
   },
   pickUpAddress: {
     type: String,
@@ -54,7 +54,7 @@ const inquirySchema = new Schema({
   },
   deliveryAddress: {
     type: String,
-    required: true
+    // required: true
   },
   portOfLoading: {
     type: String,

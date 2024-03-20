@@ -7,10 +7,12 @@ const ShipmentTrackingSchema = new mongoose.Schema({
     statuses: [
         {
             value: { type: String, required: true },
-            location: { type: String, required: true },
-            dateTime: { type: Date, required: true },
-            msg: String,
-            exceptionalMsg: String
+            details: [{
+                location: { type: String, required: true },
+                dateTime: { type: Date, required: true },
+                msg: String,
+                exceptionalMsg: String
+            }]
         }
     ],
     isDeleted: { type: Boolean, default: false }

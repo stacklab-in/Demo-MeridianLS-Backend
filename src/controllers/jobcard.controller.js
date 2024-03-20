@@ -25,7 +25,6 @@ const add = async (req, res) => {
         requestBody.trackingNumber = trackingNumber;
 
         const lead = await Lead.findOne({ _id: requestBody.leadId });
-        console.log("🚀 ~ add ~ lead:", lead)
 
         // Make Jobcard created true to lead
         lead.isJobcardCreated = true;
@@ -38,10 +37,12 @@ const add = async (req, res) => {
             trackingNo: trackingNumber,
             statuses: [{
                 value: 'Pre Shipment Doc',
-                location: 'Warehouse',
-                dateTime: new Date(),
-                msg: 'Shipment created',
-                exceptionalMsg: ''
+                details: [{
+                    location: 'Warehouse',
+                    dateTime: new Date(),
+                    msg: 'Shipment created',
+                    exceptionalMsg: ''
+                }]
             }]
         });
 

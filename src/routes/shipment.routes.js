@@ -22,6 +22,20 @@ router.post('/update',
     },
 });
 
+router.post('/update-current-status',
+    auth,
+    shipment.updateCurrentStatus
+).descriptor({
+    name: "Update a current status",
+    body: {
+        value: 'Picked Up',
+        location: 'Hinjewadi, Pune',
+        dateTime: 'dateString',
+        msg: 'Shipment picked up from warehouse',
+        exceptionalMsg: ''
+    },
+});
+
 router.post('/list',
     auth,
     shipment.list

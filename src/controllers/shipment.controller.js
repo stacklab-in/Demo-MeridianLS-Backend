@@ -54,11 +54,72 @@ const update = async (req, res) => {
             return res.status(400).json({ error: 'Shipment already in this status!' });
         };
 
-        shipment.statuses.push(updatedData);
+        shipment.statuses.push(
+            {
+                value: updatedData.value,
+                details: [{
+                    location: updatedData.location,
+                    dateTime: updatedData.dateTime,
+                    msg: updatedData.msg,
+                    exceptionalMsg: updatedData.exceptionalMsg
+                }]
+
+            }
+        );
         await shipment.save();
 
         // If the update is successful, you can send the updated shipment data in the response
         return res.status(200).json({ msg: 'Shipment Updated Successfully' });
+
+    } catch (error) {
+        serverLogger("error", { error: error.stack || error.toString() });
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+const updateCurrentStatus = async (req, res) => {
+    try {
+        const updatedData = req.body;
+
+        const shipment = await ShipmentTracking.findOne({ userId: req.user._id, isDeleted: false, _id: req.body.id });
+
+        if (!shipment) {
+            return res.status(404).json({ error: 'shipment not found' });
+        };
+
+        const jobcard = await Jobcard.findOne({ trackingNumber: shipment.trackingNo, isDeleted: false }).populate('leadId');
+
+        if (!jobcard) {
+            return res.status(404).json({ error: 'Jobcard not found!' });
+        };
+
+        const orderDetails = {
+            orderNumber: jobcard.number,
+            recipientName: jobcard.leadId.name,
+            trackingNumber: jobcard.trackingNumber,
+            carrierName: jobcard.carrierFlight,
+            estimatedDeliveryDate: jobcard.deliveryDate ? formatDate(jobcard.deliveryDate) : 'N/A',
+            trackingLink: "http://meridianls.co.in/tracking.html",
+            shipmentStatus: updatedData.value,
+            recipientEmail: jobcard.quotation.clientEmail
+        };
+        console.log("🚀 ~ updateCurrentStatus ~ orderDetails:", orderDetails)
+        
+        //  Send Mail Message
+        const emailResponse = sendEmail(orderDetails);
+
+        // 
+        shipment.statuses[shipment.statuses.length - 1].details.push({
+            location: updatedData.location,
+            dateTime: updatedData.dateTime,
+            msg: updatedData.msg,
+            exceptionalMsg: updatedData.exceptionalMsg
+        })
+
+        await shipment.save();   
+
+        // If the update is successful, you can send the updated shipment data in the response
+        return res.status(200).json({ msg: 'Current shipment updated successfully' });
 
     } catch (error) {
         serverLogger("error", { error: error.stack || error.toString() });
@@ -79,5 +140,5 @@ const getShipment = async (req, res) => {
 };
 
 module.exports = {
-    update, list, getShipment
+    update, list, getShipment, updateCurrentStatus
 }

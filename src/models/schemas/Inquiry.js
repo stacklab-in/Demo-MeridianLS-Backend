@@ -42,27 +42,23 @@ const inquirySchema = new Schema({
   },
   deliveryAddressCode: {
     type: Number,
-    // required: true
+    required: true
   },
   pickUpAddressCode: {
     type: Number,
-    // required: true
+    required: true
   },
   pickUpAddress: {
     type: String,
-    required: true
   },
   deliveryAddress: {
     type: String,
-    // required: true
   },
   portOfLoading: {
     type: String,
-    required: true
   },
   portOfDischarge: {
     type: String,
-    required: true
   }
 }, { timestamps: true, setDefaultsOnInsert: true });
 

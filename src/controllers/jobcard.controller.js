@@ -36,7 +36,7 @@ const add = async (req, res) => {
             userId: req.user._id,
             trackingNo: trackingNumber,
             statuses: [{
-                value: 'Pre Shipment Doc',
+                value: 'PreShipmentDoc',
                 details: [{
                     location: 'Warehouse',
                     dateTime: new Date(),
@@ -53,7 +53,6 @@ const add = async (req, res) => {
         requestBody.shipmentId = shipmentTracking._id;
 
         const newJobcard = await Jobcard.create(requestBody);
-        console.log("🚀 ~ add ~ requestBody:", requestBody)
 
         if (!newJobcard) {
             return res.status(400).json({ error: 'Error while creating Jobcard!..' })

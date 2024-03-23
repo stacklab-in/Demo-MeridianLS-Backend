@@ -1,5 +1,5 @@
 const Terms = require('../models/termsAndConditions');
-const Jobcard = require('../models/Jobcard');
+const Lead = require('../models/Lead');
 
 const add = async (req, res) => {
 
@@ -15,7 +15,6 @@ const add = async (req, res) => {
             return res.status(400).json({ error: 'Please enter jobcard id!' });
         };
 
-
         // Loop through each term
         for (const term of terms) {
             // Check if the term already exists in the database
@@ -27,15 +26,15 @@ const add = async (req, res) => {
             }
         };
 
-        const jobcard = await Jobcard.findOne({ _id: id, isDeleted: false });
+        const lead = await Lead.findOne({ _id: id, isDeleted: false });
 
-        if (!jobcard) {
+        if (!lead) {
             return res.status(400).json({ error: 'Jobcard not found!' });
         };
 
-        jobcard.terms = terms;
+        lead.terms = terms;
 
-        await jobcard.save();
+        await lead.save();
 
         // Respond with success message
         res.status(200).json({ msg: 'Terms added successfully' });

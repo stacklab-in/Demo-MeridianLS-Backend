@@ -14,6 +14,7 @@ const leadSchema = new Schema({
         form: formSchema
     },
     quotation: {},
+    terms: [],
     status: { type: String, enum: ['CONFIRMED', 'PENDING', 'CANCELED'] },
     isJobcardCreated: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false }
